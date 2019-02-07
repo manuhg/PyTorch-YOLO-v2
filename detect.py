@@ -50,7 +50,7 @@ def load_yolov2(image,output_file,dataset='coco',threshold=0.5,nms_thresh=0.4):
     confidence = threshold
     start = 0
     global num_classes
-    imlist = [image]
+    imlist = image
     output_file_names = [output_file]
 
     CUDA = torch.cuda.is_available()
@@ -247,8 +247,5 @@ def load_yolov2(image,output_file,dataset='coco',threshold=0.5,nms_thresh=0.4):
     torch.cuda.empty_cache()
         
         
-        
-        
-    
-    
-load_yolov2(cv2.imread('imgs/person.jpg'),'predictions.jpg')
+            
+load_yolov2(osp.join(osp.realpath('.')+'imgs/messi.jpg'),'predictions.jpg')
