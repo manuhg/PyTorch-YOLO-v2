@@ -15,6 +15,8 @@ import pandas as pd
 import random 
 import pickle as pkl
 
+num_classes=0
+
 class test_net(nn.Module):
     def __init__(self, num_layers, input_size):
         super(test_net, self).__init__()
@@ -47,6 +49,7 @@ def load_yolov2(image,output_file,dataset='coco',threshold=0.5,nms_thresh=0.4):
     batch_size = 1
     confidence = threshold
     start = 0
+    global num_classes
     imlist = [image]
     output_file_names = [output_file]
 
@@ -64,7 +67,7 @@ def load_yolov2(image,output_file,dataset='coco',threshold=0.5,nms_thresh=0.4):
         inp_dim = 544
         num_classes = 80
         classes = load_classes('data/coco.names')
-        weightsfile = 'yolo2.weights'
+        weightsfile = 'yolov2.weights'
         cfgfile = "cfg/yolo.cfg" 
         
     else: 
@@ -152,7 +155,7 @@ def load_yolov2(image,output_file,dataset='coco',threshold=0.5,nms_thresh=0.4):
         #clubbing these ops in one loop instead of two. 
         #loops are slower than vectorised operations. 
         
-        prediction = write_results(prediction, num_classes, nms = True, nms_conf = nms_thesh)
+        prediction = write_results(prediction, num_classes, nms = True, nms_conf = nms_thresh)
         
         
         end = time.time()
@@ -248,4 +251,4 @@ def load_yolov2(image,output_file,dataset='coco',threshold=0.5,nms_thresh=0.4):
         
     
     
-load_yolov2('imgs/person.jpg','predictions.jpg')
+load_yolov2(cv2.imread('imgs/person.jpg'),'predictions.jpg')
