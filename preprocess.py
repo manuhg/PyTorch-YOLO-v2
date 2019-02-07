@@ -13,14 +13,16 @@ from PIL import Image, ImageDraw
 
 
         
-def prep_image(img, inp_dim):
+def prep_image(img, inp_dim,img_is_loaded=True):
     """
     Prepare image for inputting to the neural network. 
     
     Returns a Variable 
     """
-
-    orig_im = cv2.imread(img)
+    if img_is_loaded:
+        orig_im = img
+    else:
+        orig_im = cv2.imread(img)
     dim = orig_im.shape[1], orig_im.shape[0]
     img = cv2.resize(orig_im, (inp_dim, inp_dim))
     img_ = img[:,:,::-1].transpose((2,0,1)).copy()

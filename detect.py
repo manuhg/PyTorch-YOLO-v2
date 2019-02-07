@@ -43,52 +43,28 @@ def get_test_input(input_dim, CUDA):
 
 
 
-def arg_parse():
-    """
-    Parse arguements to the detect module
-    
-    """
-    
-    
-    parser = argparse.ArgumentParser(description='YOLO v2 Detection Module')
-   
-    parser.add_argument("--images", dest = 'images', help = 
-                        "Image / Directory containing images to perform detection upon",
-                        default = "imgs", type = str)
-    parser.add_argument("--det", dest = 'det', help = 
-                        "Image / Directory to store detections to",
-                        default = "det", type = str)
-    parser.add_argument("--bs", dest = "bs", help = "Batch size", default = 1)
-    parser.add_argument("--dataset", dest = "dataset", help = "Dataset on which the network has been trained", default = "pascal")
-    parser.add_argument("--confidence", dest = "confidence", help = "Object Confidence to filter predictions", default = 0.5)
-    parser.add_argument("--nms_thresh", dest = "nms_thresh", help = "NMS Threshhold", default = 0.4)
-
-    return parser.parse_args()
-
-
-if __name__ ==  '__main__':
-    args = arg_parse()
-    images = args.images
-    batch_size = int(args.bs)
-    confidence = float(args.confidence)
-    nms_thesh = float(args.nms_thresh)
+def load_yolov2(image,output_file,dataset='coco',threshold=0.5,nms_thresh=0.4):
+    batch_size = 1
+    confidence = threshold
     start = 0
+    imlist = [image]
+    output_file_names = [output_file]
 
     CUDA = torch.cuda.is_available()
     
-    if args.dataset == "pascal":
+    if dataset == "pascal":
         inp_dim = 416
         num_classes = 20
         classes = load_classes('data/voc.names')
-        weightsfile = 'yolo-voc.weights'
+        weightsfile = 'yolov2-voc.weights'
         cfgfile = "cfg/yolo-voc.cfg"
 
     
-    elif args.dataset == "coco":
+    elif dataset == "coco":
         inp_dim = 544
         num_classes = 80
         classes = load_classes('data/coco.names')
-        weightsfile = 'yolo.weights'
+        weightsfile = 'yolo2.weights'
         cfgfile = "cfg/yolo.cfg" 
         
     else: 
@@ -115,18 +91,7 @@ if __name__ ==  '__main__':
     
     read_dir = time.time()
     #Detection phase
-    try:
-        imlist = [osp.join(osp.realpath('.'), images, img) for img in os.listdir(images)]
-    except NotADirectoryError:
-        imlist = []
-        imlist.append(osp.join(osp.realpath('.'), images))
-    except FileNotFoundError:
-        print ("No file or directory with the name {}".format(images))
-        exit()
-        
     load_batch = time.time()
-    
-
     batches = list(map(prep_image, imlist, [inp_dim for x in range(len(imlist))]))
     im_batches = [x[0] for x in batches]
     orig_ims = [x[1] for x in batches]
@@ -255,7 +220,8 @@ if __name__ ==  '__main__':
             
     list(map(lambda x: write(x, im_batches, orig_ims), output))
       
-    det_names = pd.Series(imlist).apply(lambda x: "{}/det_{}".format(args.det,x.split("/")[-1]))
+    #det_names = pd.Series(imlist).apply(lambda x: "{}/det_{}".format(args.det,x.split("/")[-1]))
+    det_names = output_file_names
     
     list(map(cv2.imwrite, det_names, orig_ims))
     
@@ -282,3 +248,4 @@ if __name__ ==  '__main__':
         
     
     
+load_yolov2('imgs/person.jpg','predictions.jpg')
